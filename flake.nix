@@ -1,9 +1,11 @@
 {
-  description = "Latest upstream Godot for NixOS, Wayland-only";
+  description = "Latest upstream Godot beta for NixOS, Wayland-first";
 
   inputs = {
-    # This will be overridden by your system flake using:
+    # Your system flake can override this with:
+    #
     # godotlatest.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    #
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
   };
 
@@ -17,33 +19,59 @@
 
       mkGodot = system:
         let
-          pkgs = import nixpkgs { inherit system; };
+          pkgs = import nixpkgs {
+            inherit system;
+          };
 
           version = "4.7-beta1";
           godotBinary = "Godot_v4.7-beta1_linux.x86_64";
 
           godotLibs = with pkgs; [
+            # Fonts / text
             fontconfig
             freetype
+            graphite2
+            harfbuzz
+            icu
 
+            # Wayland
             wayland
             libxkbcommon
             libdecor
 
+            # X11 fallback libs.
+            # Even on Wayland, Godot/nixpkgs still keeps these around because
+            # parts of linuxbsd support may expect them.
+            xorg.libX11
+            xorg.libXcursor
+            xorg.libXext
+            xorg.libXfixes
+            xorg.libXi
+            xorg.libXinerama
+            xorg.libXrandr
+            xorg.libXrender
+            xorg.libxcb
+
+            # Graphics / EGL / Vulkan
+            libGL
             mesa
             vulkan-loader
 
+            # Audio
             alsa-lib
+            libpulseaudio
             pipewire
-            pulseaudio
 
+            # System integration
             dbus
             udev
-            zlib
             glib
+            zlib
           ];
-        in
-          pkgs.stdenv.mkDerivation {
+
+          runtimeLibraryPath = pkgs.lib.makeLibraryPath godotLibs;
+
+          godot = pkgs.stdenv.mkDerivation {
             pname = "godotlatest";
             inherit version;
 
@@ -52,7 +80,7 @@
 
               # First build will fail and print the real hash.
               # Replace this with the printed sha256.
-              hash = "sha256-4CmcTpSlKxN28R91EDXBAkkTXXmrF3fWUUc8kE1QxPw=";
+              hash = pkgs.lib.fakeHash;
 
               stripRoot = false;
             };
@@ -67,17 +95,28 @@
             installPhase = ''
               runHook preInstall
 
-              mkdir -p $out/bin
-              cp $src/${godotBinary} $out/bin/godotlatest
-              chmod +x $out/bin/godotlatest
+              mkdir -p "$out/bin"
+              cp "$src/${godotBinary}" "$out/bin/godotlatest"
+              chmod +x "$out/bin/godotlatest"
 
-              wrapProgram $out/bin/godotlatest \
-                --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath godotLibs}" \
-                --add-flags "--display-driver wayland"
+              wrapProgram "$out/bin/godotlatest" \
+                --prefix LD_LIBRARY_PATH : "${runtimeLibraryPath}:/run/opengl-driver/lib" \
+                --add-flags "--display-driver wayland" \
+                --add-flags "--rendering-driver vulkan"
 
               runHook postInstall
             '';
+
+            meta = {
+              description = "Upstream Godot beta binary wrapped for NixOS";
+              homepage = "https://godotengine.org";
+              license = pkgs.lib.licenses.mit;
+              platforms = supportedSystems;
+              mainProgram = "godotlatest";
+            };
           };
+        in
+          godot;
     in {
       packages = forAllSystems (system: {
         default = mkGodot system;
@@ -98,7 +137,9 @@
 
       devShells = forAllSystems (system:
         let
-          pkgs = import nixpkgs { inherit system; };
+          pkgs = import nixpkgs {
+            inherit system;
+          };
         in {
           default = pkgs.mkShell {
             packages = [
