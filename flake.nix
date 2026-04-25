@@ -1,80 +1,111 @@
 {
-  description = "Upstream Godot (Wayland-only) with godotlatest command";
+  description = "Latest upstream Godot for NixOS, Wayland-only";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs = {
+    # This will be overridden by your system flake using:
+    # godotlatest.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+  };
 
   outputs = { self, nixpkgs }:
     let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
+      supportedSystems = [
+        "x86_64-linux"
+      ];
 
-      version = "4.7-beta1";
-      godotBinary = "Godot_v4.7-beta1_linux.x86_64";
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-      godot = pkgs.stdenv.mkDerivation {
-        pname = "godotlatest";
-        inherit version;
+      mkGodot = system:
+        let
+          pkgs = import nixpkgs { inherit system; };
 
-        src = pkgs.fetchzip {
-          url = "https://godot-releases.nbg1.your-objectstorage.com/${version}/Godot_v${version}_linux.x86_64.zip";
-          hash = pkgs.lib.fakeHash; # replace after first run
-          stripRoot = false;
+          version = "4.7-beta1";
+          godotBinary = "Godot_v4.7-beta1_linux.x86_64";
+
+          godotLibs = with pkgs; [
+            fontconfig
+            freetype
+
+            wayland
+            libxkbcommon
+            libdecor
+
+            mesa
+            vulkan-loader
+
+            alsa-lib
+            pipewire
+            pulseaudio
+
+            dbus
+            udev
+            zlib
+            glib
+          ];
+        in
+          pkgs.stdenv.mkDerivation {
+            pname = "godotlatest";
+            inherit version;
+
+            src = pkgs.fetchzip {
+              url = "https://godot-releases.nbg1.your-objectstorage.com/${version}/Godot_v${version}_linux.x86_64.zip";
+
+              # First build will fail and print the real hash.
+              # Replace this with the printed sha256.
+              hash = pkgs.lib.fakeHash;
+
+              stripRoot = false;
+            };
+
+            nativeBuildInputs = with pkgs; [
+              autoPatchelfHook
+              makeWrapper
+            ];
+
+            buildInputs = godotLibs;
+
+            installPhase = ''
+              runHook preInstall
+
+              mkdir -p $out/bin
+              cp $src/${godotBinary} $out/bin/godotlatest
+              chmod +x $out/bin/godotlatest
+
+              wrapProgram $out/bin/godotlatest \
+                --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath godotLibs}" \
+                --add-flags "--display-driver wayland"
+
+              runHook postInstall
+            '';
+          };
+    in {
+      packages = forAllSystems (system: {
+        default = mkGodot system;
+        godotlatest = mkGodot system;
+      });
+
+      apps = forAllSystems (system: {
+        default = {
+          type = "app";
+          program = "${self.packages.${system}.default}/bin/godotlatest";
         };
 
-        nativeBuildInputs = with pkgs; [
-          autoPatchelfHook
-          makeWrapper
-        ];
+        godotlatest = {
+          type = "app";
+          program = "${self.packages.${system}.godotlatest}/bin/godotlatest";
+        };
+      });
 
-        buildInputs = with pkgs; [
-          fontconfig
-          freetype
-
-          wayland
-          libxkbcommon
-          libdecor
-
-          mesa
-          vulkan-loader
-
-          alsa-lib
-          pipewire
-          pulseaudio
-
-          dbus
-          udev
-          zlib
-          glib
-        ];
-
-        installPhase = ''
-          runHook preInstall
-
-          mkdir -p $out/bin
-          cp $src/${godotBinary} $out/bin/godotlatest
-          chmod +x $out/bin/godotlatest
-
-          wrapProgram $out/bin/godotlatest \
-            --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath buildInputs}" \
-            --add-flags "--display-driver wayland"
-
-          runHook postInstall
-        '';
-      };
-
-    in {
-      packages.${system}.godotlatest = godot;
-      packages.${system}.default = godot;
-
-      apps.${system}.godotlatest = {
-        type = "app";
-        program = "${godot}/bin/godotlatest";
-      };
-
-      apps.${system}.default = self.apps.${system}.godotlatest;
-
-      devShells.${system}.default = pkgs.mkShell {
-        packages = [ godot ];
-      };
+      devShells = forAllSystems (system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in {
+          default = pkgs.mkShell {
+            packages = [
+              self.packages.${system}.default
+            ];
+          };
+        }
+      );
     };
 }
