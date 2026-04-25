@@ -52,7 +52,7 @@
 
               # First build will fail and print the real hash.
               # Replace this with the printed sha256.
-              hash = pkgs.lib.fakeHash;
+              hash = "sha256-4CmcTpSlKxN28R91EDXBAkkTXXmrF3fWUUc8kE1QxPw=";
 
               stripRoot = false;
             };
