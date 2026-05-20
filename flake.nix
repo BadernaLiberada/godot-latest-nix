@@ -23,8 +23,8 @@
             inherit system;
           };
 
-          version = "4.7-beta1";
-          godotBinary = "Godot_v4.7-beta1_linux.x86_64";
+          version = "4.7-beta2";
+          godotBinary = "Godot_v4.7-beta2_linux.x86_64";
 
           godotLibs = with pkgs; [
             # Fonts / text
@@ -77,11 +77,7 @@
 
             src = pkgs.fetchzip {
               url = "https://godot-releases.nbg1.your-objectstorage.com/${version}/Godot_v${version}_linux.x86_64.zip";
-
-              # First build will fail and print the real hash.
-              # Replace this with the printed sha256.
-              hash = "sha256-4CmcTpSlKxN28R91EDXBAkkTXXmrF3fWUUc8kE1QxPw=";
-
+              hash = "nohashyet";
               stripRoot = false;
             };
 
