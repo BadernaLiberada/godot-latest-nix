@@ -1,5 +1,5 @@
 # godot-latest-nix
-Latest Godot version for nixos wayland (Current 4.7 Beta 2).
+Latest Godot version for nixos wayland (Current 4.7 Beta 3).
 Command is > godotlatest
 
 add to your flake:
