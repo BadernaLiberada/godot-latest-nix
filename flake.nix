@@ -23,8 +23,8 @@
             inherit system;
           };
 
-          version = "4.7-beta2";
-          godotBinary = "Godot_v4.7-beta2_linux.x86_64";
+          version = "4.7-beta3";
+          godotBinary = "Godot_v4.7-beta3_linux.x86_64";
 
           godotLibs = with pkgs; [
             # Fonts / text
@@ -77,7 +77,7 @@
 
             src = pkgs.fetchzip {
               url = "https://godot-releases.nbg1.your-objectstorage.com/${version}/Godot_v${version}_linux.x86_64.zip";
-              hash = "nohashyet";
+              hash = "";
               stripRoot = false;
             };
 
