@@ -1,5 +1,5 @@
 {
-  description = "Latest upstream Godot beta for NixOS, Wayland-first";
+  description = "Latest upstream Godot for NixOS, Wayland Compatible";
 
   inputs = {
     # Your system flake can override this with:
@@ -23,8 +23,8 @@
             inherit system;
           };
 
-          version = "4.7-beta3";
-          godotBinary = "Godot_v4.7-beta3_linux.x86_64";
+          version = "4.7-rc1";
+          godotBinary = "Godot_v4.7-rc1_linux.x86_64";
 
           godotLibs = with pkgs; [
             # Fonts / text
@@ -77,7 +77,7 @@
 
             src = pkgs.fetchzip {
               url = "https://godot-releases.nbg1.your-objectstorage.com/${version}/Godot_v${version}_linux.x86_64.zip";
-              hash = "sha256-UcSGjCw/cl0EKUXx27fcKs8wKYz5ORYCn5jT8MUAAyE=";
+              hash = "";
               stripRoot = false;
             };
 
