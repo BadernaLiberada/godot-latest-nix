@@ -77,7 +77,7 @@
 
             src = pkgs.fetchzip {
               url = "https://godot-releases.nbg1.your-objectstorage.com/${version}/Godot_v${version}_linux.x86_64.zip";
-              hash = "";
+              hash = "sha256-9qrm9CRNp/XtEQSa+Y4uv3OATpBBJTdlGAujeqcrNds=";
               stripRoot = false;
             };
 
