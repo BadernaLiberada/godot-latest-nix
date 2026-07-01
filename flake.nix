@@ -42,15 +42,15 @@
             # X11 fallback libs.
             # Even on Wayland, Godot/nixpkgs still keeps these around because
             # parts of linuxbsd support may expect them.
-            xorg.libX11
-            xorg.libXcursor
-            xorg.libXext
-            xorg.libXfixes
-            xorg.libXi
-            xorg.libXinerama
-            xorg.libXrandr
-            xorg.libXrender
-            xorg.libxcb
+            libX11
+            libXcursor
+            libXext
+            libXfixes
+            libXi
+            libXinerama
+            libXrandr
+            libXrender
+            libxcb
 
             # Graphics / EGL / Vulkan
             libGL
