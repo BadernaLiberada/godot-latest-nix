@@ -1,12 +1,8 @@
 {
-  description = "Latest upstream Godot for NixOS, Wayland Compatible";
+  description = "Latest upstream Godot for NixOS Wayland";
 
   inputs = {
-    # Your system flake can override this with:
-    #
-    # godotlatest.inputs.nixpkgs.follows = "nixpkgs-unstable";
-    #
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-26.05";
   };
 
   outputs = { self, nixpkgs }:
@@ -67,6 +63,7 @@
             dbus
             udev
             glib
+            glibc
             zlib
           ];
 
@@ -105,7 +102,7 @@
             '';
 
             meta = {
-              description = "Upstream Godot beta binary wrapped for NixOS";
+              description = "Godot NixOS Wayland";
               homepage = "https://godotengine.org";
               license = pkgs.lib.licenses.mit;
               platforms = supportedSystems;
