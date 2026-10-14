@@ -23,8 +23,8 @@
             inherit system;
           };
 
-          version = "4.7.2-stable";
-          godotBinary = "Godot_v4.7.2-stable_linux.x86_64";
+          version = "4.7.2";
+          godotBinary = "Godot_v4.7.2_linux.x86_64";
 
           godotLibs = with pkgs; [
             # Fonts / text
