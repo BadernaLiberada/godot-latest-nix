@@ -77,7 +77,7 @@
             inherit version;
 
             src = pkgs.fetchzip {
-              url = "https://godot-releases.nbg1.your-objectstorage.com/${version}-${flavor}_linux.x86_64.zip";
+              url = "https://godot-releases.nbg1.your-objectstorage.com/${version}-${flavor}/Godot_v${version}-${flavor}_linux.x86_64.zip";
               hash = "";
               stripRoot = false;
             };
