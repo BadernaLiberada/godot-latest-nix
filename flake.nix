@@ -24,7 +24,8 @@
           };
 
           version = "4.7.2";
-          godotBinary = "Godot_v4.7.2_linux.x86_64";
+          flavor = "stable";
+          godotBinary = "Godot_v$(version)-$(flavor)_linux.x86_64";
 
           godotLibs = with pkgs; [
             # Fonts / text
@@ -76,7 +77,7 @@
             inherit version;
 
             src = pkgs.fetchzip {
-              url = "https://godot-releases.nbg1.your-objectstorage.com/${version}/Godot_v${version}_linux.x86_64.zip";
+              url = "https://downloads.godotengine.org/?version=${version}&flavor=$(flavor)&slug=linux.x86_64.zip&platform=linux.64";
               hash = "";
               stripRoot = false;
             };
